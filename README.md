@@ -1,0 +1,2 @@
+# Solucionador_matem-tico_integrado
+Solucionador_matemático_integrado
