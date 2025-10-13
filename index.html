@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resolvedor de Operaciones Matemáticas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .contenedor-principal {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 30px;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-controles {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-panel {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e7ff;
+        }
+
+        .header-panel h2 {
+            color: #1e293b;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-panel p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .panel-resultado {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background-image:
+                linear-gradient(to right, rgba(102, 126, 234, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(102, 126, 234, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .grupo-control {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #334155;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label::before {
+            content: "•";
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #1e293b;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        select:hover, input[type="text"]:hover {
+            border-color: #cbd5e1;
+        }
+
+        input[type="text"] {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-resolver {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-resolver:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-resolver:active {
+            transform: translateY(0);
+        }
+
+        .btn-limpiar {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+        }
+
+        .btn-limpiar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.5);
+        }
+
+        .btn-calculadora {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-calculadora:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+
+        .mensaje-error {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid #dc2626;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .titulo-resultado {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: #1e293b;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .titulo-resultado::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .contenedor-operacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 350px;
+        }
+
+        .operacion-visual {
+            font-size: 24px;
+            animation: zoomIn 0.4s ease-out;
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .tabla-solucion {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        .tabla-solucion td {
+            padding: 0;
+            text-align: center;
+            width: 1.2em;
+            position: relative;
+        }
+
+        .tabla-solucion .llevada-cell {
+            color: #dc2626;
+            font-size: 0.7em;
+            vertical-align: bottom;
+            padding-bottom: 0.3em;
+        }
+
+        .tabla-solucion .digito {
+            padding-top: 0.2em;
+        }
+
+        .tabla-solucion .linea-cell {
+            border-top: 2px solid #667eea;
+            padding: 0;
+        }
+
+        .tabla-solucion .signo {
+            text-align: right;
+            padding-right: 5px;
+            width: auto;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .tabla-solucion .coma {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .solucion {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .solucion-division-visual {
+            white-space: pre;
+            font-family: monospace;
+            line-height: 1.5;
+            color: #059669;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .campos-operacion {
+            display: none;
+        }
+
+        .info-ayuda {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            color: #1e40af;
+            padding: 18px;
+            border-radius: 12px;
+            margin-top: 25px;
+            font-size: 13px;
+            line-height: 1.8;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .info-ayuda strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        optgroup {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        option {
+            padding: 8px;
+        }
+
+        .placeholder-mensaje {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        .placeholder-mensaje::before {
+            content: "📊";
+            display: block;
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Modal Calculadora */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeInModal 0.3s ease;
+            overflow-y: auto;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #f3f6fa;
+            max-width: 900px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            padding: 25px;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .close-modal {
+            background: #e2e8f0;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 22px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .close-modal:hover {
+            background: #cbd5e1;
+            transform: rotate(90deg);
+        }
+
+        /* Estilos para calculadora dentro del modal */
+        .calc-row {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 16px;
+        }
+
+        .calc-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .calc-panel h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 8px;
+        }
+
+        .expr-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+
+        .expr-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .calc-btn {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 12px;
+        }
+
+        .calc-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .calc-btn.primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            grid-column: span 2;
+        }
+
+        .calc-btn.warn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            grid-column: span 2;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .key {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .key:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: scale(1.05);
+        }
+
+        .output {
+            height: 280px;
+            overflow-y: auto;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .step {
+            padding: 6px 8px;
+            border-left: 3px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.06);
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .expr {
+            font-size: 13px;
+            color: #1e293b;
+            margin-top: 2px;
+        }
+
+        .footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .hint {
+            font-size: 10px;
+            color: #6b7280;
+            margin-top: 6px;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 1100px) {
+            .contenedor-principal {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-controles {
+                position: relative;
+                top: 0;
+            }
+
+            .calc-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .panel-controles, .panel-resultado {
+                padding: 25px;
+                border-radius: 15px;
+            }
+
+            .header-panel h2 {
+                font-size: 22px;
+            }
+
+            .titulo-resultado {
+                font-size: 24px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a4291 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <div class="panel-controles">
+            <div class="header-panel">
+                <h2>🧮 Resolvedor Matemático</h2>
+                <p>Soluciones paso a paso</p>
+            </div>
+            
+            <div class="grupo-control">
+                <label for="tipo-operacion">Tipo de operación</label>
+                <select id="tipo-operacion" onchange="cambiarTipoOperacion()">
+                    <optgroup label="Operaciones con números naturales">
+                        <option value="suma">Suma</option>
+                        <option value="resta">Resta</option>
+                        <option value="multiplicacion_1x4">Multiplicación (1 cifra)</option>
+                        <option value="multiplicacion_5x2">Multiplicación (2 cifras)</option>
+                        <option value="division_1_cifra">División (por 1 cifra)</option>
+                        <option value="division_2_cifras">División (por 2 cifras)</option>
+                    </optgroup>
+                    <optgroup label="Operaciones con decimales">
+                        <option value="suma_decimal">Suma de decimales</option>
+                        <option value="resta_decimal">Resta de decimales</option>
+                        <option value="mult-decimal">Multiplicación de decimales</option>
+                        <option value="mult-potencia10">Multiplicación × 10, 100, 1000...</option>
+                        <option value="div-potencia10">División ÷ 10, 100, 1000...</option>
+                        <option value="div-decimal-natural">División: decimal ÷ natural</option>
+                        <option value="div-natural-decimal">División: natural ÷ decimal</option>
+                        <option value="div-decimal-decimal">División: decimal ÷ decimal</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="campos-operacion" id="campos-suma">
+                <div class="grupo-control">
+                    <label for="num1-suma">Primer número</label>
+                    <input type="text" id="num1-suma" placeholder="Ej: 1234">
+                </div>
+                <div class="grupo-control">
+                    <label for="num2-suma">Segundo número</label>
+                    <input type="text" id="num2-suma" placeholder="Ej: 5678">
+                </div>
+                <div class="grupo-control">
+                    <label for="num3-suma">Tercer número</label>
+                    <input type="text" id="num3-suma" placeholder="Ej: 9012">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-resta">
+                <div class="grupo-control">
+                    <label for="minuendo">Minuendo</label>
+                    <input type="text" id="minuendo" placeholder="Ej: 9876">
+                </div>
+                <div class="grupo-control">
+                    <label for="sustraendo">Sustraendo</label>
+                    <input type="text" id="sustraendo" placeholder="Ej: 1234">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-mult-1">
+                <div class="grupo-control">
+                    <label for="multiplicando-1">Multiplicando</label>
+                    <input type="text" id="multiplicando-1" placeholder="Ej: 4567">
+                </div>
+                <div class="grupo-control">
+                    <label for="multiplicador-1">Multiplicador (1 cifra)</label>
+                    <input type="text" id="multiplicador-1" placeholder="Ej: 8" maxlength="1">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-mult-2">
+                <div class="grupo-control">
+                    <label for="multiplicando-2">Multiplicando</label>
+                    <input type="text" id="multiplicando-2" placeholder="Ej: 45678">
+                </div>
+                <div class="grupo-control">
+                    <label for="multiplicador-2">Multiplicador (2 cifras)</label>
+                    <input type="text" id="multiplicador-2" placeholder="Ej: 34">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-div-1">
+                <div class="grupo-control">
+                    <label for="dividendo-1">Dividendo</label>
+                    <input type="text" id="dividendo-1" placeholder="Ej: 34722">
+                </div>
+                <div class="grupo-control">
+                    <label for="divisor-1">Divisor (1 cifra)</label>
+                    <input type="text" id="divisor-1" placeholder="Ej: 6" maxlength="1">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-div-2">
+                <div class="grupo-control">
+                    <label for="dividendo-2">Dividendo</label>
+                    <input type="text" id="dividendo-2" placeholder="Ej: 3472257">
+                </div>
+                <div class="grupo-control">
+                    <label for="divisor-2">Divisor (2 cifras)</label>
+                    <input type="text" id="divisor-2" placeholder="Ej: 57">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-suma-decimal">
+                <div class="grupo-control">
+                    <label for="num1-suma-dec">Primer número</label>
+                    <input type="text" id="num1-suma-dec" placeholder="Ej: 12.435">
+                </div>
+                <div class="grupo-control">
+                    <label for="num2-suma-dec">Segundo número</label>
+                    <input type="text" id="num2-suma-dec" placeholder="Ej: 142.36">
+                </div>
+                <div class="grupo-control">
+                    <label for="num3-suma-dec">Tercer número (opcional)</label>
+                    <input type="text" id="num3-suma-dec" placeholder="Ej: 8.7">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-resta-decimal">
+                <div class="grupo-control">
+                    <label for="minuendo-dec">Minuendo</label>
+                    <input type="text" id="minuendo-dec" placeholder="Ej: 9.1">
+                </div>
+                <div class="grupo-control">
+                    <label for="sustraendo-dec">Sustraendo</label>
+                    <input type="text" id="sustraendo-dec" placeholder="Ej: 3.82">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-mult-decimal">
+                <div class="grupo-control">
+                    <label for="factor1">Primer factor</label>
+                    <input type="text" id="factor1" placeholder="Ej: 4.31">
+                </div>
+                <div class="grupo-control">
+                    <label for="factor2">Segundo factor</label>
+                    <input type="text" id="factor2" placeholder="Ej: 2.6">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-mult-potencia">
+                <div class="grupo-control">
+                    <label for="num-mult-pot">Número decimal</label>
+                    <input type="text" id="num-mult-pot" placeholder="Ej: 3.25">
+                </div>
+                <div class="grupo-control">
+                    <label for="potencia-mult">Potencia de 10</label>
+                    <select id="potencia-mult">
+                        <option value="10">10</option>
+                        <option value="100">100</option>
+                        <option value="1000">1.000</option>
+                        <option value="10000">10.000</option>
+                        <option value="100000">100.000</option>
+                        <option value="1000000">1.000.000</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-div-potencia">
+                <div class="grupo-control">
+                    <label for="num-div-pot">Número decimal</label>
+                    <input type="text" id="num-div-pot" placeholder="Ej: 24.2">
+                </div>
+                <div class="grupo-control">
+                    <label for="potencia-div">Potencia de 10</label>
+                    <select id="potencia-div">
+                        <option value="10">10</option>
+                        <option value="100">100</option>
+                        <option value="1000">1.000</option>
+                        <option value="10000">10.000</option>
+                        <option value="100000">100.000</option>
+                        <option value="1000000">1.000.000</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-div-dec-nat">
+                <div class="grupo-control">
+                    <label for="dividendo-dec">Dividendo (decimal)</label>
+                    <input type="text" id="dividendo-dec" placeholder="Ej: 125.36">
+                </div>
+                <div class="grupo-control">
+                    <label for="divisor-nat">Divisor (natural)</label>
+                    <input type="text" id="divisor-nat" placeholder="Ej: 4">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-div-nat-dec">
+                <div class="grupo-control">
+                    <label for="dividendo-nat">Dividendo (natural)</label>
+                    <input type="text" id="dividendo-nat" placeholder="Ej: 1176">
+                </div>
+                <div class="grupo-control">
+                    <label for="divisor-dec">Divisor (decimal)</label>
+                    <input type="text" id="divisor-dec" placeholder="Ej: 1.2">
+                </div>
+            </div>
+
+            <div class="campos-operacion" id="campos-div-dec-dec">
+                <div class="grupo-control">
+                    <label for="dividendo-dec2">Dividendo (decimal)</label>
+                    <input type="text" id="dividendo-dec2" placeholder="Ej: 256.32">
+                </div>
+                <div class="grupo-control">
+                    <label for="divisor-dec2">Divisor (decimal)</label>
+                    <input type="text" id="divisor-dec2" placeholder="Ej: 3.9">
+                </div>
+            </div>
+
+            <button class="btn-resolver" onclick="resolverOperacion()">
+                <span>🔢</span>
+                <span>Resolver Operación</span>
+            </button>
+            <button class="btn-limpiar" onclick="limpiarTodo()">
+                <span>🗑️</span>
+                <span>Limpiar</span>
+            </button>
+            <button class="btn-calculadora" onclick="abrirCalculadora()">
+                <span>🔬</span>
+                <span>Calculadora de Operaciones Combinadas</span>
+            </button>
+
+            <div class="mensaje-error" id="mensaje-error"></div>
+
+            <div class="info-ayuda">
+                <strong>💡 Ayuda</strong>
+                • Introduce solo números enteros positivos (operaciones naturales)<br>
+                • Usa punto (.) como separador decimal<br>
+                • En restas, el minuendo debe ser mayor que el sustraendo<br>
+                • En divisiones, el divisor no puede ser 0
+            </div>
+        </div>
+
+        <div class="panel-resultado">
+            <div class="titulo-resultado">Solución</div>
+            <div class="contenedor-operacion" id="resultado">
+                <div class="placeholder-mensaje">Introduce los números y pulsa "Resolver Operación"</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Calculadora -->
+    <div id="modalCalculadora" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🔬 Calculadora de Operaciones Combinadas</div>
+                <button class="close-modal" onclick="cerrarCalculadora()">×</button>
+            </div>
+
+            <div class="calc-row">
+                <div class="calc-panel">
+                    <h3>Operación</h3>
+                    <input id="expr" class="expr-input" type="text"
+                        placeholder="Ej: {[(3+5)^2 - 4] / 2} + 7"
+                        autocomplete="off" />
+
+                    <div class="controls">
+                        <button class="calc-btn" data-insert="(">(</button>
+                        <button class="calc-btn" data-insert=")">)</button>
+                        <button class="calc-btn" data-insert="[">[</button>
+                        <button class="calc-btn" data-insert="]">]</button>
+                        <button class="calc-btn" data-insert="{">{</button>
+                        <button class="calc-btn" data-insert="}">}</button>
+                        <button class="calc-btn" data-insert="^">^</button>
+                        <button class="calc-btn" data-insert="√(">√</button>
+                        <button class="calc-btn" data-insert="+">+</button>
+                        <button class="calc-btn" data-insert="-">−</button>
+                        <button class="calc-btn" data-insert="*">×</button>
+                        <button class="calc-btn" data-insert="/">÷</button>
+                        <button class="calc-btn" id="backspace">⌫</button>
+                        <button class="calc-btn warn" id="clear">Limpiar</button>
+                        <button class="calc-btn primary" id="solve">Resolver</button>
+                    </div>
+
+                    <div class="keypad">
+                        <div class="key" data-insert="7">7</div>
+                        <div class="key" data-insert="8">8</div>
+                        <div class="key" data-insert="9">9</div>
+                        <div class="key" data-insert="/">÷</div>
+
+                        <div class="key" data-insert="4">4</div>
+                        <div class="key" data-insert="5">5</div>
+                        <div class="key" data-insert="6">6</div>
+                        <div class="key" data-insert="*">×</div>
+
+                        <div class="key" data-insert="1">1</div>
+                        <div class="key" data-insert="2">2</div>
+                        <div class="key" data-insert="3">3</div>
+                        <div class="key" data-insert="-">−</div>
+
+                        <div class="key" data-insert="(">(</div>
+                        <div class="key" data-insert="0">0</div>
+                        <div class="key" data-insert=")">)</div>
+                        <div class="key" data-insert="+">+</div>
+                    </div>
+
+                    <div class="hint">
+                        ^ para potencias • √ para raíces • (), [], {} para agrupar
+                    </div>
+                </div>
+
+                <div class="calc-panel">
+                    <h3>Solución paso a paso</h3>
+                    <div id="output" class="output"></div>
+                    <div class="footer">
+                        <button class="calc-btn" id="copyExpr">Copiar operación</button>
+                        <button class="calc-btn" id="copySteps">Copiar pasos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== FUNCIONES PRINCIPALES DEL RESOLVEDOR ==========
+        
+        function cambiarTipoOperacion() {
+            const tipo = document.getElementById('tipo-operacion').value;
+            
+            document.querySelectorAll('.campos-operacion').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            const mapaCampos = {
+                'suma': 'campos-suma',
+                'resta': 'campos-resta',
+                'multiplicacion_1x4': 'campos-mult-1',
+                'multiplicacion_5x2': 'campos-mult-2',
+                'division_1_cifra': 'campos-div-1',
+                'division_2_cifras': 'campos-div-2',
+                'suma_decimal': 'campos-suma-decimal',
+                'resta_decimal': 'campos-resta-decimal',
+                'mult-decimal': 'campos-mult-decimal',
+                'mult-potencia10': 'campos-mult-potencia',
+                'div-potencia10': 'campos-div-potencia',
+                'div-decimal-natural': 'campos-div-dec-nat',
+                'div-natural-decimal': 'campos-div-nat-dec',
+                'div-decimal-decimal': 'campos-div-dec-dec'
+            };
+
+            if (mapaCampos[tipo]) {
+                document.getElementById(mapaCampos[tipo]).style.display = 'block';
+            }
+
+            limpiarResultado();
+        }
+
+        function mostrarError(mensaje) {
+            const errorDiv = document.getElementById('mensaje-error');
+            errorDiv.textContent = mensaje;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function validarNumero(valor, nombre) {
+            if (!valor || valor.trim() === '') {
+                throw new Error(`El campo "${nombre}" está vacío`);
+            }
+            if (!/^\d+$/.test(valor.trim())) {
+                throw new Error(`El campo "${nombre}" debe contener solo números`);
+            }
+            return parseInt(valor.trim());
+        }
+
+        function validarDecimal(valor, nombre, opcional = false) {
+            if (opcional && (!valor || valor.trim() === '')) {
+                return null;
+            }
+            if (!valor || valor.trim() === '') {
+                throw new Error(`El campo "${nombre}" está vacío`);
+            }
+            const valorLimpio = valor.trim().replace(',', '.');
+            if (!/^\d+\.?\d*$/.test(valorLimpio)) {
+                throw new Error(`El campo "${nombre}" debe contener un número decimal válido`);
+            }
+            return parseFloat(valorLimpio);
+        }
+
+        function contarDecimales(numero) {
+            const str = numero.toString();
+            if (str.indexOf('.') === -1) return 0;
+            return str.split('.')[1].length;
+        }
+
+        function crearTablaSolucion(digitos, signos, llevadas, resultado) {
+            const maxLen = Math.max(...digitos.map(arr => arr.length), resultado.length);
+            let html = '<table class="tabla-solucion">';
+            
+            if (llevadas && llevadas.some(l => l !== null && l !== '')) {
+                html += '<tr>';
+                html += '<td class="signo"></td>';
+                for (let i = 0; i < maxLen; i++) {
+                    const llevadaIndex = maxLen - 1 - i;
+                    html += `<td class="llevada-cell">${llevadas[llevadaIndex] || ''}</td>`;
+                }
+                html += '</tr>';
+            }
+            
+            digitos.forEach((digitosNum, index) => {
+                html += '<tr>';
+                html += `<td class="signo">${signos[index] || ''}</td>`;
+                
+                for (let i = 0; i < maxLen; i++) {
+                    const digitoIndex = maxLen - 1 - i;
+                    const digito = digitosNum[digitoIndex] !== undefined ? digitosNum[digitoIndex] : '';
+                    const esComma = digito === '.';
+                    html += `<td class="digito ${esComma ? 'coma' : ''}">${digito}</td>`;
+                }
+                html += '</tr>';
+            });
+
+            html += '<tr>';
+            html += '<td class="signo"></td>';
+            html += `<td colspan="${maxLen}" class="linea-cell"></td>`;
+            html += '</tr>';
+
+            html += '<tr>';
+            html += '<td class="signo"></td>';
+            for (let i = 0; i < maxLen; i++) {
+                const digitoIndex = maxLen - 1 - i;
+                const digito = resultado[digitoIndex] !== undefined ? resultado[digitoIndex] : '';
+                const esComma = digito === '.';
+                html += `<td class="digito solucion ${esComma ? 'coma' : ''}">${digito}</td>`;
+            }
+            html += '</tr>';
+            
+            html += '</table>';
+            return html;
+        }
+
+        function resolverSuma(nums) {
+            const resultado = nums.reduce((a, b) => a + b, 0);
+            const maxLen = Math.max(...nums.map(n => n.toString().length), resultado.toString().length);
+            
+            let llevadas = new Array(maxLen + 1).fill(null);
+            for (let pos = 0; pos < maxLen; pos++) {
+                let sumaColumna = (llevadas[pos] || 0);
+                for (let num of nums) {
+                    sumaColumna += Math.floor(num / Math.pow(10, pos)) % 10;
+                }
+                if (sumaColumna >= 10) {
+                    llevadas[pos + 1] = Math.floor(sumaColumna / 10);
+                }
+            }
+            
+            if (resultado.toString().length > Math.max(...nums.map(n => n.toString().length))) {
+                llevadas[maxLen - 1] = null;
+            }
+
+            const digitos = nums.map(num => {
+                return num.toString().padStart(maxLen, ' ').split('').reverse();
+            });
+            const signos = new Array(nums.length).fill('');
+            signos[nums.length - 1] = '+';
+            
+            const resultadoDigitos = resultado.toString().padStart(maxLen, ' ').split('').reverse();
+            return crearTablaSolucion(digitos, signos, llevadas, resultadoDigitos);
+        }
+
+        function resolverResta(minuendo, sustraendo) {
+            if (minuendo < sustraendo) {
+                throw new Error('El minuendo debe ser mayor que el sustraendo');
+            }
+
+            const resultado = minuendo - sustraendo;
+            const minuendoStr = minuendo.toString();
+            const sustraendoStr = sustraendo.toString();
+            const maxLen = Math.max(minuendoStr.length, sustraendoStr.length);
+
+            let llevadas = new Array(maxLen + 1).fill(null);
+            let borrow = 0;
+
+            for (let i = 0; i < maxLen; i++) {
+                const minuendoDigit = parseInt(minuendoStr[minuendoStr.length - 1 - i] || '0');
+                const sustraendoDigit = parseInt(sustraendoStr[sustraendoStr.length - 1 - i] || '0');
+
+                let minuendoActual = minuendoDigit - borrow;
+                
+                if (minuendoActual < sustraendoDigit) {
+                    borrow = 1; 
+                    if (i < maxLen) { 
+                        llevadas[i + 1] = '•'; 
+                    }
+                } else {
+                    borrow = 0;
+                }
+            }
+            
+            const digitos = [
+                minuendo.toString().padStart(maxLen, ' ').split('').reverse(),
+                sustraendo.toString().padStart(maxLen, ' ').split('').reverse()
+            ];
+            const signos = ['', '−'];
+            const resultadoDigitos = resultado.toString().padStart(maxLen, ' ').split('').reverse();
+            
+            return crearTablaSolucion(digitos, signos, llevadas, resultadoDigitos);
+        }
+
+        function resolverMultiplicacion1Cifra(multiplicando, multiplicador) {
+            const resultado = multiplicando * multiplicador;
+            const maxLen = Math.max(multiplicando.toString().length, resultado.toString().length);
+
+            let llevadas = new Array(maxLen + 1).fill(null);
+            const digitosInvertidos = multiplicando.toString().split('').reverse().map(Number);
+            let carry = 0;
+            for (let i = 0; i < digitosInvertidos.length; i++) {
+                const producto = digitosInvertidos[i] * multiplicador + carry;
+                carry = Math.floor(producto / 10);
+                if (carry > 0) {
+                    llevadas[i + 1] = carry;
+                }
+            }
+
+            if (resultado.toString().length > multiplicando.toString().length && llevadas.length >= maxLen) {
+                llevadas[maxLen - 1] = null;
+            }
+
+            const digitosTabla = [];
+            digitosTabla.push(multiplicando.toString().padStart(maxLen, ' ').split('').reverse());
+            const multiplicadorArr = new Array(maxLen).fill('');
+            multiplicadorArr[0] = multiplicador.toString();
+            if (maxLen > 1) {
+                multiplicadorArr[1] = '×';
+            }
+            digitosTabla.push(multiplicadorArr);
+            
+            const signos = ['', ''];
+            const resultadoDigitos = resultado.toString().padStart(maxLen, ' ').split('').reverse();
+            
+            return crearTablaSolucion(digitosTabla, signos, llevadas, resultadoDigitos);
+        }
+
+        function resolverMultiplicacion2Cifras(multiplicando, multiplicador) {
+            const multStr = multiplicador.toString();
+            const unidades = parseInt(multStr[multStr.length - 1]);
+            const decenas = multStr.length > 1 ? parseInt(multStr[multStr.length - 2]) : 0;
+            const producto1 = multiplicando * unidades;
+            const producto2 = multiplicando * decenas;
+            const resultado = multiplicando * multiplicador;
+
+            const multiplicadorConSigno = '×' + multiplicador.toString();
+            const producto2Str = producto2 > 0 ? producto2.toString() : '';
+            
+            const numsStr = [
+                multiplicando.toString(),
+                multiplicadorConSigno,
+                producto1.toString(),
+                producto2Str,
+                resultado.toString()
+            ];
+            
+            const maxLen = Math.max(...numsStr.map(s => s.length + (s === producto2Str && s !== '' ? 1 : 0)));
+
+            const crearFila = (texto, signo = '', clase = '', desplazamiento = 0) => {
+                let htmlFila = '<tr>';
+                htmlFila += `<td class="signo">${signo}</td>`;
+                const textoPadding = texto.padStart(maxLen - desplazamiento, ' ');
+                for (const char of textoPadding) {
+                    htmlFila += `<td class="digito ${clase}">${char === ' ' ? '' : char}</td>`;
+                }
+                for (let i = 0; i < desplazamiento; i++) {
+                    htmlFila += '<td></td>';
+                }
+                htmlFila += '</tr>';
+                return htmlFila;
+            };
+            
+            const crearLinea = () => {
+                return `<tr><td class="signo"></td><td colspan="${maxLen}" class="linea-cell"></td></tr>`;
+            };
+
+            let html = '<table class="tabla-solucion">';
+            html += crearFila(multiplicando.toString());
+            html += crearFila(multiplicadorConSigno, '');
+            html += crearLinea();
+            html += crearFila(producto1.toString(), '', 'solucion');
+            if (producto2 > 0) {
+                html += crearFila(producto2.toString(), '', 'solucion', 1);
+            }
+            html += crearLinea();
+            html += crearFila(resultado.toString(), '', 'solucion');
+            html += '</table>';
+            
+            return html;
+        }
+
+        function resolverDivisionEstiloAlgoritmo(dividendo, divisor) {
+            if (divisor === 0) {
+                throw new Error('No se puede dividir por cero');
+            }
+            if (dividendo < divisor) {
+                throw new Error('El dividendo debe ser mayor o igual al divisor');
+            }
+
+            const D_str = dividendo.toString();
+            const d_str = divisor.toString();
+            const d_val = parseInt(d_str);
+            
+            const Q_str = Math.floor(dividendo / d_val).toString();
+
+            const D_esp = D_str.split('').join(' ');
+            const d_esp = d_str.split('').join(' ');
+            const Q_esp = Q_str.split('').join(' ');
+            const lenD_esp = D_esp.length;
+
+            let output_lines = [];
+            output_lines.push(`${D_esp} | ${d_esp}`);
+            output_lines.push(`${' '.repeat(lenD_esp)} |${'-'.repeat(Q_esp.length)}`);
+            
+            let intermediate_lines = [];
+            
+            let current_dividend_str = '';
+            let dividend_idx = 0;
+            while (dividend_idx < D_str.length) {
+                current_dividend_str += D_str[dividend_idx];
+                if (parseInt(current_dividend_str) >= d_val) {
+                    break;
+                }
+                dividend_idx++;
+            }
+
+            let final_remainder_val = -1;
+            
+            while(true) {
+                let current_dividend_val = parseInt(current_dividend_str);
+                
+                let quotient_digit = Math.floor(current_dividend_val / d_val);
+                let current_remainder_val = current_dividend_val % d_val;
+                
+                dividend_idx++;
+                
+                if (dividend_idx >= D_str.length) {
+                    final_remainder_val = current_remainder_val;
+                    break;
+                }
+                
+                current_dividend_str = current_remainder_val.toString() + D_str[dividend_idx];
+                
+                const target_len_intermedio = d_str.length + 1;
+                let num_to_display = current_dividend_str.padStart(target_len_intermedio, '0');
+                if (parseInt(current_dividend_str) >= Math.pow(10, d_str.length)) {
+                    num_to_display = current_dividend_str;
+                }
+                
+                let P_esp = num_to_display.split('').join(' ');
+                let target_pos = dividend_idx * 2;
+                let padding = target_pos - (P_esp.length - 1);
+                let line = ' '.repeat(Math.max(0, padding)) + P_esp;
+                intermediate_lines.push(line);
+            }
+
+            if (final_remainder_val !== -1) {
+                 const target_len_final = d_str.length;
+                 let remainder_to_display = final_remainder_val.toString().padStart(target_len_final, '0');
+                 if (final_remainder_val >= Math.pow(10, d_str.length -1) && d_str.length > 1) {
+                    remainder_to_display = final_remainder_val.toString();
+                 }
+                 if (final_remainder_val === 0 && d_str.length === 1) {
+                    remainder_to_display = "0";
+                 }
+
+                 let R_esp = remainder_to_display.split('').join(' ');
+                 let target_pos = (D_str.length - 1) * 2;
+                 let padding = target_pos - (R_esp.length - 1);
+                 let line = ' '.repeat(Math.max(0, padding)) + R_esp;
+                 intermediate_lines.push(line);
+            }
+            
+            if (intermediate_lines.length > 0) {
+                output_lines.push(`${intermediate_lines[0].padEnd(lenD_esp, ' ')} | ${Q_esp}`);
+                for (let k = 1; k < intermediate_lines.length; k++) {
+                    output_lines.push(intermediate_lines[k]);
+                }
+            } else {
+                 const R_val = dividendo % d_val;
+                 output_lines.push(`${' '.repeat(lenD_esp)} | ${Q_esp}`);
+                 const R_esp = R_val.toString().split('').join(' ');
+                 const end_pos_simple = (D_str.length - 1) * 2;
+                 const padding_len_simple = end_pos_simple - (R_esp.length - 1);
+                 output_lines.push(' '.repeat(Math.max(0, padding_len_simple)) + R_esp);
+            }
+
+            return `<div class="solucion-division-visual">${output_lines.join('\n')}</div>`;
+        }
+
+        function resolverSumaDecimales(nums) {
+            const resultado = nums.reduce((a, b) => a + b, 0);
+            const maxDecimales = Math.max(...nums.map(contarDecimales));
+            const numsFormateados = nums.map(n => n.toFixed(maxDecimales));
+            const resultadoFormateado = resultado.toFixed(maxDecimales);
+            
+            const partes = numsFormateados.map(n => n.split('.'));
+            const partesResultado = resultadoFormateado.split('.');
+            const maxLenEntero = Math.max(...partes.map(p => p[0].length), partesResultado[0].length);
+            const totalLen = maxLenEntero + 1 + maxDecimales;
+            
+            const digitosCompletos = numsFormateados.map(n => {
+                const [entero, decimal] = n.split('.');
+                return entero.padStart(maxLenEntero, ' ') + '.' + decimal;
+            });
+            
+            const resultadoCompleto = partesResultado[0].padStart(maxLenEntero, ' ') + '.' + partesResultado[1];
+            
+            let llevadas = new Array(totalLen + 1).fill(null);
+            for (let pos = 0; pos < totalLen; pos++) {
+                let posReal = totalLen - 1 - pos;
+                if (digitosCompletos[0][posReal] === '.') continue;
+                
+                let suma = llevadas[pos] || 0;
+                for (let numStr of digitosCompletos) {
+                    const caracter = numStr[posReal];
+                    if (caracter !== ' ' && caracter !== '.') {
+                        suma += parseInt(caracter);
+                    }
+                }
+                if (suma >= 10) {
+                    llevadas[pos + 1] = Math.floor(suma / 10);
+                }
+            }
+            
+            const digitosArray = digitosCompletos.map(d => d.split('').reverse());
+            const signos = new Array(nums.length).fill('');
+            signos[nums.length - 1] = '+';
+            const resultadoArray = resultadoCompleto.split('').reverse();
+            
+            return crearTablaSolucion(digitosArray, signos, llevadas, resultadoArray);
+        }
+
+        function resolverRestaDecimales(minuendo, sustraendo) {
+            if (minuendo < sustraendo) {
+                throw new Error('El minuendo debe ser mayor que el sustraendo');
+            }
+
+            const resultado = minuendo - sustraendo;
+            const maxDecimales = Math.max(contarDecimales(minuendo), contarDecimales(sustraendo));
+            
+            const minuendoStr = minuendo.toFixed(maxDecimales);
+            const sustraendoStr = sustraendo.toFixed(maxDecimales);
+            const resultadoStr = resultado.toFixed(maxDecimales);
+            
+            const [minEntero, minDecimal] = minuendoStr.split('.');
+            const [susEntero, susDecimal] = sustraendoStr.split('.');
+            const [resEntero, resDecimal] = resultadoStr.split('.');
+            
+            const maxLenEntero = Math.max(minEntero.length, susEntero.length, resEntero.length);
+            const totalLen = maxLenEntero + 1 + maxDecimales;
+            
+            const minuendoCompleto = minEntero.padStart(maxLenEntero, ' ') + '.' + minDecimal;
+            const sustraendoCompleto = susEntero.padStart(maxLenEntero, ' ') + '.' + susDecimal;
+            const resultadoCompleto = resEntero.padStart(maxLenEntero, ' ') + '.' + resDecimal;
+            
+            let llevadas = new Array(totalLen + 1).fill(null);
+            let borrow = 0;
+            
+            for (let pos = 0; pos < totalLen; pos++) {
+                let posReal = totalLen - 1 - pos;
+                if (minuendoCompleto[posReal] === '.') continue;
+                
+                const digitoMin = minuendoCompleto[posReal] === ' ' ? 0 : parseInt(minuendoCompleto[posReal]);
+                const digitoSus = sustraendoCompleto[posReal] === ' ' ? 0 : parseInt(sustraendoCompleto[posReal]);
+                
+                let digitoActual = digitoMin - borrow;
+                if (digitoActual < digitoSus) {
+                    borrow = 1;
+                    llevadas[pos + 1] = '•';
+                } else {
+                    borrow = 0;
+                }
+            }
+            
+            const digitosArray = [
+                minuendoCompleto.split('').reverse(),
+                sustraendoCompleto.split('').reverse()
+            ];
+            const signos = ['', '−'];
+            const resultadoArray = resultadoCompleto.split('').reverse();
+            
+            return crearTablaSolucion(digitosArray, signos, llevadas, resultadoArray);
+        }
+
+        function resolverMultiplicacionDecimales(factor1, factor2) {
+            const decimales1 = contarDecimales(factor1);
+            const decimales2 = contarDecimales(factor2);
+            const totalDecimales = decimales1 + decimales2;
+            
+            const num1SinDecimal = factor1.toString().replace('.', '');
+            const num2SinDecimal = factor2.toString().replace('.', '');
+            const int1 = parseInt(num1SinDecimal);
+            const int2 = parseInt(num2SinDecimal);
+            
+            const digitosMultiplicador = num2SinDecimal.split('').reverse();
+            let productosIntermedio = [];
+            
+            for (let i = 0; i < digitosMultiplicador.length; i++) {
+                const digito = parseInt(digitosMultiplicador[i]);
+                productosIntermedio.push({
+                    valor: int1 * digito,
+                    desplazamiento: i
+                });
+            }
+            
+            const productoFinal = int1 * int2;
+            let resultadoStr = productoFinal.toString();
+            
+            if (totalDecimales > 0) {
+                while (resultadoStr.length <= totalDecimales) {
+                    resultadoStr = '0' + resultadoStr;
+                }
+                const posicionComa = resultadoStr.length - totalDecimales;
+                resultadoStr = resultadoStr.slice(0, posicionComa) + '.' + resultadoStr.slice(posicionComa);
+                 if (resultadoStr.startsWith('.')) {
+                    resultadoStr = '0' + resultadoStr;
+                }
+            }
+            
+            const factor1Str = factor1.toString();
+            const factor2Str = factor2.toString();
+            const multiplicadorConSigno = '×' + factor2Str;
+            
+            const maxLen = Math.max(
+                factor1Str.length,
+                multiplicadorConSigno.length,
+                ...productosIntermedio.map(p => p.valor.toString().length + p.desplazamiento),
+                resultadoStr.length
+            );
+            
+            const crearFila = (texto, signo = '', clase = '', desplazamiento = 0) => {
+                let htmlFila = '<tr>';
+                htmlFila += `<td class="signo">${signo}</td>`;
+                const textoPadding = texto.padStart(maxLen - desplazamiento, ' ');
+                for (const char of textoPadding) {
+                    const esComa = char === '.';
+                    htmlFila += `<td class="digito ${clase} ${esComa ? 'coma' : ''}">${char === ' ' ? '' : char}</td>`;
+                }
+                for (let i = 0; i < desplazamiento; i++) {
+                    htmlFila += '<td></td>';
+                }
+                htmlFila += '</tr>';
+                return htmlFila;
+            };
+            
+            let html = '<table class="tabla-solucion">';
+            html += crearFila(factor1Str);
+            html += crearFila(multiplicadorConSigno, '');
+            html += `<tr><td class="signo"></td><td colspan="${maxLen}" class="linea-cell"></td></tr>`;
+            
+            if (productosIntermedio.length > 1) {
+                productosIntermedio.forEach(producto => {
+                    html += crearFila(producto.valor.toString(), '', '', producto.desplazamiento);
+                });
+                html += `<tr><td class="signo"></td><td colspan="${maxLen}" class="linea-cell"></td></tr>`;
+            }
+
+            html += crearFila(resultadoStr, '', 'solucion');
+            
+            html += '</table>';
+            return html;
+        }
+
+        function resolverMultiplicacionPotencia10(numero, potencia) {
+            const ceros = Math.log10(potencia);
+            const resultado = numero * potencia;
+            return `<div style="font-size: 20px; line-height: 2;"><div><strong>Regla:</strong> Desplazar la coma ${ceros} lugar${ceros > 1 ? 'es' : ''} a la derecha</div><br><div style="color: #2563eb;"><strong>${numero}</strong> × <strong>${potencia.toLocaleString('es-ES')}</strong> = <strong style="color: #059669;">${resultado}</strong></div></div>`;
+        }
+
+        function resolverDivisionPotencia10(numero, potencia) {
+            const ceros = Math.log10(potencia);
+            const resultado = numero / potencia;
+            return `<div style="font-size: 20px; line-height: 2;"><div><strong>Regla:</strong> Desplazar la coma ${ceros} lugar${ceros > 1 ? 'es' : ''} a la izquierda</div><br><div style="color: #2563eb;"><strong>${numero}</strong> ÷ <strong>${potencia.toLocaleString('es-ES')}</strong> = <strong style="color: #059669;">${resultado}</strong></div></div>`;
+        }
+
+        function formatearDivision(dividendoParaFormato, divisorOriginalStr, dividendoCalculoStr, divisorCalculoStr) {
+            function getSpacedIndexFromCalculo(calculoIndex, originalString) {
+                let tempCalculoIndex = -1;
+                for (let originalIndex = 0; originalIndex < originalString.length; originalIndex++) {
+                    if (originalString[originalIndex] !== '.') {
+                        tempCalculoIndex++;
+                        if (tempCalculoIndex === calculoIndex) {
+                            return originalIndex * 2;
+                        }
+                    }
+                }
+                return -1;
+            }
+
+            const divisor = parseInt(divisorCalculoStr);
+            if (isNaN(divisor) || divisor === 0) return 'Error en divisor';
+
+            const dividendoSpaced = dividendoParaFormato.split('').join(' ');
+            const posComaSpaced = dividendoSpaced.indexOf('.');
+
+            let cociente = '';
+            let restoActualStr = '';
+            const todosLosPasos = [];
+            let haComenzado = false;
+            
+            const posComaOriginal = dividendoParaFormato.indexOf('.');
+            let digitosConsumidos = 0;
+
+            for (let i = 0; i < dividendoCalculoStr.length; i++) {
+                restoActualStr += dividendoCalculoStr[i];
+                if (!haComenzado) digitosConsumidos++;
+                let dividendoParcialNum = parseInt(restoActualStr);
+
+                if (dividendoParcialNum >= divisor || haComenzado) {
+                    if (!haComenzado) haComenzado = true;
+                    
+                    let digitoCociente = Math.floor(dividendoParcialNum / divisor);
+                    let resto = dividendoParcialNum % divisor;
+                    cociente += digitoCociente;
+                    restoActualStr = resto.toString();
+                    
+                    let esUltimoPaso = (i === dividendoCalculoStr.length - 1);
+                    let linea = esUltimoPaso ? resto.toString() : resto.toString() + dividendoCalculoStr[i + 1];
+                    todosLosPasos.push({ linea: linea, pos_calc: esUltimoPaso ? i : i + 1 });
+                }
+            }
+            
+            if (posComaOriginal !== -1) {
+                const posComaCociente = posComaOriginal - digitosConsumidos + 1;
+                if (posComaCociente > 0 && posComaCociente <= cociente.length) {
+                    cociente = cociente.slice(0, posComaCociente) + '.' + cociente.slice(posComaCociente);
+                } else if (posComaCociente <= 0) {
+                    cociente = '0.' + '0'.repeat(Math.abs(posComaCociente)) + cociente;
+                }
+            }
+            
+            if (cociente.startsWith('.')) cociente = '0' + cociente;
+            if (cociente === '' || !/[1-9]/.test(cociente)) cociente = '0';
+
+            const divisorSpaced = divisorOriginalStr.split('').join(' ');
+            const cocienteSpaced = cociente.toString().split('').join(' ');
+            const lenDividendo = dividendoSpaced.length;
+            
+            let output = [];
+            output.push(`${dividendoSpaced} | ${divisorSpaced}`);
+            output.push(`${' '.repeat(lenDividendo)} |${'-'.repeat(cocienteSpaced.length + 2)}`);
+
+            if (todosLosPasos.length === 0) {
+                output.push(`${' '.repeat(lenDividendo)} | ${cocienteSpaced}`);
+                return `<div class="solucion-division-visual">${output.join('\n')}</div>`;
+            }
+
+            const lineasDePasos = [];
+            todosLosPasos.forEach((paso, index) => {
+                const targetPos = getSpacedIndexFromCalculo(paso.pos_calc, dividendoParaFormato);
+                let lineChars = new Array(targetPos + 1).fill(' ');
+
+                let linea_a_mostrar = paso.linea;
+                const esElRestoFinal = index === todosLosPasos.length - 1;
+
+                if (esElRestoFinal) {
+                    const target_len_final = divisorCalculoStr.length;
+                    let remainder_to_display = linea_a_mostrar.padStart(target_len_final, '0');
+                    if (parseInt(linea_a_mostrar) === 0 && divisorCalculoStr.length === 1) remainder_to_display = "0";
+                    linea_a_mostrar = remainder_to_display;
+                } else {
+                    const target_len_intermedio = divisorCalculoStr.length + 1;
+                    let num_to_display = linea_a_mostrar.padStart(target_len_intermedio, '0');
+                    if (parseInt(linea_a_mostrar) >= Math.pow(10, divisorCalculoStr.length)) num_to_display = linea_a_mostrar;
+                    linea_a_mostrar = num_to_display;
+                }
+                
+                const digitosSinEspacios = linea_a_mostrar.split('');
+                let P_esp = '';
+                const posComaEnDividendo = dividendoParaFormato.indexOf('.');
+                const lenParteEnteraDividendo = posComaEnDividendo === -1 ? dividendoParaFormato.length : posComaEnDividendo;
+                const digitosAlineados = paso.pos_calc + 1;
+                
+                if (posComaEnDividendo !== -1 && digitosAlineados > lenParteEnteraDividendo) {
+                    const digitosAntesComa = lenParteEnteraDividendo - (digitosAlineados - digitosSinEspacios.length);
+                    let temp_P_esp = [];
+                    for(let k=0; k < digitosSinEspacios.length; k++) {
+                        temp_P_esp.push(digitosSinEspacios[k]);
+                        if (k === digitosAntesComa - 1) {
+                             temp_P_esp.push(' ');
+                        }
+                    }
+                    P_esp = temp_P_esp.join(' ');
+                } else {
+                    P_esp = digitosSinEspacios.join(' ');
+                }
+                
+                let padding = targetPos - (P_esp.length -1);
+                let line = ' '.repeat(Math.max(0, padding)) + P_esp;
+                lineasDePasos.push(line);
+            });
+            
+            output.push(`${lineasDePasos[0].padEnd(lenDividendo, ' ')} | ${cocienteSpaced}`);
+            output.push(...lineasDePasos.slice(1));
+            return `<div class="solucion-division-visual">${output.join('\n')}</div>`;
+        }
+
+        function prepararYResolverDivision(dividendo, divisor) {
+            if (divisor === 0) throw new Error("No se puede dividir por cero");
+
+            const dividendoStr = dividendo.toString();
+            const divisorStr = divisor.toString();
+            const decimalesDivisor = contarDecimales(divisor);
+
+            if (decimalesDivisor === 0) {
+                const dividendoCalculoStr = dividendoStr.replace('.', '');
+                return formatearDivision(dividendoStr, divisorStr, dividendoCalculoStr, divisorStr);
+            }
+
+            const multiplicador = Math.pow(10, decimalesDivisor);
+            const divisorCalculo = Math.round(divisor * multiplicador);
+            const dividendoCalculo = dividendo * multiplicador;
+            
+            const numDecimalesDividendo = contarDecimales(dividendo);
+            const decimalesFinales = Math.max(0, numDecimalesDividendo - decimalesDivisor);
+            
+            const dividendoParaFormato = dividendoCalculo.toFixed(decimalesFinales);
+            const dividendoCalculoStr = dividendoParaFormato.replace('.', '');
+            
+            return formatearDivision(dividendoParaFormato, divisorCalculo.toString(), dividendoCalculoStr, divisorCalculo.toString());
+        }
+
+        function resolverOperacion() {
+            const tipo = document.getElementById('tipo-operacion').value;
+            const resultado = document.getElementById('resultado');
+
+            try {
+                let html = '';
+
+                if (tipo === 'suma') {
+                    const num1 = validarNumero(document.getElementById('num1-suma').value, 'Primer número');
+                    const num2 = validarNumero(document.getElementById('num2-suma').value, 'Segundo número');
+                    const num3 = validarNumero(document.getElementById('num3-suma').value, 'Tercer número');
+                    html = resolverSuma([num1, num2, num3]);
+
+                } else if (tipo === 'resta') {
+                    const minuendo = validarNumero(document.getElementById('minuendo').value, 'Minuendo');
+                    const sustraendo = validarNumero(document.getElementById('sustraendo').value, 'Sustraendo');
+                    html = resolverResta(minuendo, sustraendo);
+
+                } else if (tipo === 'multiplicacion_1x4') {
+                    const multiplicando = validarNumero(document.getElementById('multiplicando-1').value, 'Multiplicando');
+                    const multiplicador = validarNumero(document.getElementById('multiplicador-1').value, 'Multiplicador');
+                    if (multiplicador > 9) {
+                        throw new Error('El multiplicador debe ser de 1 cifra (0-9)');
+                    }
+                    html = resolverMultiplicacion1Cifra(multiplicando, multiplicador);
+
+                } else if (tipo === 'multiplicacion_5x2') {
+                    const multiplicando = validarNumero(document.getElementById('multiplicando-2').value, 'Multiplicando');
+                    const multiplicador = validarNumero(document.getElementById('multiplicador-2').value, 'Multiplicador');
+                    html = resolverMultiplicacion2Cifras(multiplicando, multiplicador);
+
+                } else if (tipo === 'division_1_cifra') {
+                    const dividendo = validarNumero(document.getElementById('dividendo-1').value, 'Dividendo');
+                    const divisor = validarNumero(document.getElementById('divisor-1').value, 'Divisor');
+                    if (divisor > 9) {
+                        throw new Error('El divisor debe ser de 1 cifra (1-9)');
+                    }
+                    html = resolverDivisionEstiloAlgoritmo(dividendo, divisor);
+
+                } else if (tipo === 'division_2_cifras') {
+                    const dividendo = validarNumero(document.getElementById('dividendo-2').value, 'Dividendo');
+                    const divisor = validarNumero(document.getElementById('divisor-2').value, 'Divisor');
+                    html = resolverDivisionEstiloAlgoritmo(dividendo, divisor);
+
+                } else if (tipo === 'suma_decimal') {
+                    const num1 = validarDecimal(document.getElementById('num1-suma-dec').value, 'Primer número');
+                    const num2 = validarDecimal(document.getElementById('num2-suma-dec').value, 'Segundo número');
+                    const num3 = validarDecimal(document.getElementById('num3-suma-dec').value, 'Tercer número', true);
+                    const nums = num3 !== null ? [num1, num2, num3] : [num1, num2];
+                    html = resolverSumaDecimales(nums);
+
+                } else if (tipo === 'resta_decimal') {
+                    const minuendo = validarDecimal(document.getElementById('minuendo-dec').value, 'Minuendo');
+                    const sustraendo = validarDecimal(document.getElementById('sustraendo-dec').value, 'Sustraendo');
+                    html = resolverRestaDecimales(minuendo, sustraendo);
+
+                } else if (tipo === 'mult-decimal') {
+                    const factor1 = validarDecimal(document.getElementById('factor1').value, 'Primer factor');
+                    const factor2 = validarDecimal(document.getElementById('factor2').value, 'Segundo factor');
+                    html = resolverMultiplicacionDecimales(factor1, factor2);
+
+                } else if (tipo === 'mult-potencia10') {
+                    const numero = validarDecimal(document.getElementById('num-mult-pot').value, 'Número decimal');
+                    const potencia = parseInt(document.getElementById('potencia-mult').value);
+                    html = resolverMultiplicacionPotencia10(numero, potencia);
+
+                } else if (tipo === 'div-potencia10') {
+                    const numero = validarDecimal(document.getElementById('num-div-pot').value, 'Número decimal');
+                    const potencia = parseInt(document.getElementById('potencia-div').value);
+                    html = resolverDivisionPotencia10(numero, potencia);
+
+                } else if (tipo === 'div-decimal-natural') {
+                    const dividendo = validarDecimal(document.getElementById('dividendo-dec').value, 'Dividendo');
+                    const divisor = validarDecimal(document.getElementById('divisor-nat').value, 'Divisor');
+                    if (divisor % 1 !== 0) {
+                        throw new Error('El divisor debe ser un número natural (sin decimales)');
+                    }
+                    html = prepararYResolverDivision(dividendo, divisor);
+
+                } else if (tipo === 'div-natural-decimal') {
+                    const dividendo = validarDecimal(document.getElementById('dividendo-nat').value, 'Dividendo');
+                    const divisor = validarDecimal(document.getElementById('divisor-dec').value, 'Divisor');
+                    if (dividendo % 1 !== 0) {
+                        throw new Error('El dividendo debe ser un número natural (sin decimales)');
+                    }
+                    html = prepararYResolverDivision(dividendo, divisor);
+
+                } else if (tipo === 'div-decimal-decimal') {
+                    const dividendo = validarDecimal(document.getElementById('dividendo-dec2').value, 'Dividendo');
+                    const divisor = validarDecimal(document.getElementById('divisor-dec2').value, 'Divisor');
+                    html = prepararYResolverDivision(dividendo, divisor);
+                }
+
+                resultado.innerHTML = `<div class="operacion-visual">${html}</div>`;
+
+            } catch (error) {
+                mostrarError('⚠ ' + error.message);
+                resultado.innerHTML = '<div class="placeholder-mensaje">Introduce los números y pulsa "Resolver Operación"</div>';
+            }
+        }
+
+        function limpiarResultado() {
+            document.getElementById('resultado').innerHTML = '<div class="placeholder-mensaje">Introduce los números y pulsa "Resolver Operación"</div>';
+        }
+
+        function limpiarTodo() {
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                input.value = '';
+            });
+            limpiarResultado();
+            document.getElementById('mensaje-error').style.display = 'none';
+        }
+
+        // ========== FUNCIONES MODAL CALCULADORA ==========
+
+        function abrirCalculadora() {
+            document.getElementById('modalCalculadora').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarCalculadora() {
+            document.getElementById('modalCalculadora').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarCalculadora();
+            }
+        });
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalCalculadora').addEventListener('click', (e) => {
+            if (e.target.id === 'modalCalculadora') {
+                cerrarCalculadora();
+            }
+        });
+
+        // ========== LÓGICA CALCULADORA COMBINADAS ==========
+
+        const exprInput = document.getElementById('expr');
+        const output = document.getElementById('output');
+        const solveBtn = document.getElementById('solve');
+        const clearBtn = document.getElementById('clear');
+        const backspaceBtn = document.getElementById('backspace');
+        const copyExprBtn = document.getElementById('copyExpr');
+        const copyStepsBtn = document.getElementById('copySteps');
+
+        function insertAtCursor(input, text) {
+            const start = input.selectionStart ?? input.value.length;
+            const end = input.selectionEnd ?? input.value.length;
+            const before = input.value.slice(0, start);
+            const after = input.value.slice(end);
+            input.value = before + text + after;
+            const caret = start + text.length;
+            input.setSelectionRange(caret, caret);
+            input.focus();
+        }
+
+        document.querySelectorAll('.calc-btn[data-insert], .key[data-insert]').forEach(el => {
+            el.addEventListener('click', () => insertAtCursor(exprInput, el.dataset.insert));
+        });
+
+        clearBtn.addEventListener('click', () => {
+            exprInput.value = '';
+            output.innerHTML = '';
+            exprInput.focus();
+        });
+
+        backspaceBtn.addEventListener('click', () => {
+            const val = exprInput.value;
+            if (val.length > 0) {
+                if (val.endsWith('√(')) exprInput.value = val.slice(0, -2);
+                else exprInput.value = val.slice(0, -1);
+                exprInput.focus();
+            }
+        });
+
+        async function copyText(text) {
+            try { await navigator.clipboard.writeText(text); } catch (e) {}
+        }
+        copyExprBtn.addEventListener('click', () => copyText(exprInput.value));
+        copyStepsBtn.addEventListener('click', () => copyText(output.innerText.trim()));
+
+        exprInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                resolveExpression();
+            }
+        });
+
+        const Ops = {
+            '+': { prec: 2, assoc: 'L', fn: (a,b) => a + b },
+            '-': { prec: 2, assoc: 'L', fn: (a,b) => a - b },
+            '*': { prec: 3, assoc: 'L', fn: (a,b) => a * b },
+            '/': { prec: 3, assoc: 'L', fn: (a,b) => a / b },
+            '^': { prec: 4, assoc: 'R', fn: (a,b) => Math.pow(a, b) },
+        };
+
+        function normalizeBrackets(s) {
+            return s.replace(/\[/g, '(').replace(/\]/g, ')')
+                    .replace(/\{/g, '(').replace(/\}/g, ')')
+                    .replace(/√/g, 'sqrt');
+        }
+
+        function tokenize(s) {
+            const tokens = []; let i = 0;
+            while (i < s.length) {
+                const ch = s[i];
+                if (/\s/.test(ch)) { i++; continue; }
+                if (s.substr(i, 4) === 'sqrt') { tokens.push({ type: 'func', value: 'sqrt' }); i += 4; continue; }
+                if (/\d/.test(ch) || (ch === '.' && /\d/.test(s[i+1] || ''))) {
+                    let num = ch; i++;
+                    while (i < s.length && /[\d.]/.test(s[i])) { num += s[i++]; }
+                    tokens.push({ type: 'num', value: parseFloat(num), raw: num }); continue;
+                }
+                if (ch === '(' || ch === ')') { tokens.push({ type: 'par', value: ch }); i++; continue; }
+                if (Ops[ch]) {
+                    if (ch === '-' && (tokens.length === 0 ||
+                        (tokens[tokens.length - 1].type !== 'num' && tokens[tokens.length - 1].value !== ')'))) {
+                        tokens.push({ type: 'num', value: 0, raw: '0' });
+                    }
+                    tokens.push({ type: 'op', value: ch }); i++; continue;
+                }
+                throw new Error(`Carácter no reconocido: '${ch}'`);
+            }
+            return tokens.map(t => t.type === 'par' && t.value === ')' ? { type: 'par_close', value: ')' } :
+                                t.type === 'par' && t.value === '(' ? { type: 'par_open', value: '(' } : t);
+        }
+
+        function toRPN(tokens, steps) {
+            const out = [], stack = [];
+            for (const t of tokens) {
+                if (t.type === 'num') out.push(t);
+                else if (t.type === 'func') stack.push(t);
+                else if (t.type === 'op') {
+                    const o1 = t.value;
+                    while (stack.length) {
+                        const top = stack[stack.length - 1];
+                        if (top.type === 'op') {
+                            const o2 = top.value;
+                            const cond = (Ops[o1].assoc === 'L' && Ops[o1].prec <= Ops[o2].prec) ||
+                                        (Ops[o1].assoc === 'R' && Ops[o1].prec <  Ops[o2].prec);
+                            if (cond) { out.push(stack.pop()); continue; }
+                        }
+                        break;
+                    }
+                    stack.push(t);
+                } else if (t.type === 'par_open') stack.push(t);
+                else if (t.type === 'par_close') {
+                    while (stack.length && stack[stack.length - 1].type !== 'par_open') out.push(stack.pop());
+                    if (!stack.length) throw new Error('Paréntesis desequilibrados');
+                    stack.pop();
+                    if (stack.length && stack[stack.length - 1].type === 'func') out.push(stack.pop());
+                }
+            }
+            while (stack.length) {
+                const x = stack.pop();
+                if (x.type === 'par_open' || x.type === 'par_close') throw new Error('Paréntesis desequilibrados');
+                out.push(x);
+            }
+            steps.push({ label: 'RPN (Notación polaca inversa)',
+                        expr: out.map(t => t.raw || t.value).join(' ') });
+            return out;
+        }
+
+        function evalRPN(rpn, steps) {
+            const stack = []; let stepNo = 0;
+            for (const t of rpn) {
+                if (t.type === 'num') stack.push(t.value);
+                else if (t.type === 'func' && t.value === 'sqrt') {
+                    const a = stack.pop(); if (a === undefined) throw new Error('Faltan operandos para sqrt');
+                    const res = Math.sqrt(a); stack.push(res);
+                    stepNo++; steps.push({ label: `Paso ${stepNo}: sqrt`, expr: `√${a} = ${res}` });
+                } else if (t.type === 'op') {
+                    const b = stack.pop(), a = stack.pop();
+                    if (a === undefined || b === undefined) throw new Error('Faltan operandos');
+                    const res = Ops[t.value].fn(a,b); stack.push(res);
+                    stepNo++; steps.push({ label: `Paso ${stepNo}: ${t.value}`, expr: `${a} ${t.value} ${b} = ${res}` });
+                }
+            }
+            if (stack.length !== 1) throw new Error('Expresión inválida');
+            return stack[0];
+        }
+
+        function resolveExpression() {
+            const raw = exprInput.value.trim(); output.innerHTML = '';
+            if (!raw) return writeStep('Aviso', 'Introduce una operación.');
+            const normalized = normalizeBrackets(raw);
+            writeStep('Expresión', raw);
+            try {
+                const steps = [];
+                const tokens = tokenize(normalized);
+                steps.push({ label: 'Tokenización', expr: tokens.map(t => t.raw || t.value).join(' ') });
+                const rpn = toRPN(tokens, steps);
+                const result = evalRPN(rpn, steps);
+                steps.forEach(s => writeStep(s.label, s.expr));
+                writeStep('Resultado final', String(result));
+            } catch (e) { writeStep('Error', e.message); }
+        }
+
+        function writeStep(label, exprText) {
+            const div = document.createElement('div');
+            div.className = 'step';
+            div.innerHTML = `<div class="label">${label}</div><div class="expr">${exprText}</div>`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        solveBtn.addEventListener('click', resolveExpression);
+
+        // Inicializar
+        cambiarTipoOperacion();
+    </script>
+</body>
+</html>
