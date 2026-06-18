@@ -891,21 +891,23 @@
             return html;
         }
 
-        function resolverMultiplicacionPotencia10(numero, potencia) {
+        function resolverMultiplicacionPotencia10(numStr, potencia) {
             const ceros = Math.round(Math.log10(potencia));
-            const resultado = limpiarFlotante(numero * potencia);
+            const numDot = String(numStr).trim().replace(',', '.');
+            const resultado = desplazarComaStr(numDot, ceros, true);
             return `<div class="resultado-regla">
                 <div class="regla"><span class="etq">Regla</span> Desplaza la coma <b>${ceros}</b> ${ceros > 1 ? 'lugares' : 'lugar'} a la <b>derecha</b>.</div>
-                <div class="igualdad"><span class="num">${formatES(numero)}</span><span class="op">×</span><span class="num">${formatES(potencia)}</span><span class="op">=</span><span class="res">${formatES(resultado)}</span></div>
+                <div class="igualdad"><span class="num">${formatESstr(numDot)}</span><span class="op">×</span><span class="num">${formatES(potencia)}</span><span class="op">=</span><span class="res">${formatESstr(resultado)}</span></div>
             </div>`;
         }
 
-        function resolverDivisionPotencia10(numero, potencia) {
+        function resolverDivisionPotencia10(numStr, potencia) {
             const ceros = Math.round(Math.log10(potencia));
-            const resultado = limpiarFlotante(numero / potencia);
+            const numDot = String(numStr).trim().replace(',', '.');
+            const resultado = desplazarComaStr(numDot, ceros, false);
             return `<div class="resultado-regla">
                 <div class="regla"><span class="etq">Regla</span> Desplaza la coma <b>${ceros}</b> ${ceros > 1 ? 'lugares' : 'lugar'} a la <b>izquierda</b>.</div>
-                <div class="igualdad"><span class="num">${formatES(numero)}</span><span class="op">÷</span><span class="num">${formatES(potencia)}</span><span class="op">=</span><span class="res">${formatES(resultado)}</span></div>
+                <div class="igualdad"><span class="num">${formatESstr(numDot)}</span><span class="op">÷</span><span class="num">${formatES(potencia)}</span><span class="op">=</span><span class="res">${formatESstr(resultado)}</span></div>
             </div>`;
         }
         function formatearDivision(dividendoParaFormato, divisorOriginalStr, dividendoCalculoStr, divisorCalculoStr) {
@@ -1169,7 +1171,39 @@
         /* ================= UTILIDADES ================= */
         function limpiarFlotante(x){
             if (!isFinite(x)) return x;
-            return Math.round((x + Number.EPSILON) * 1e10) / 1e10;
+            if (x === 0) return 0;
+            // toPrecision funciona en cualquier magnitud (Math.round*1e10 fallaba con
+            // resultados grandes al superar el entero seguro de JS).
+            return Number(x.toPrecision(12));
+        }
+        // Formato español a partir de una CADENA "ent.dec" (sin pasar por float).
+        function formatESstr(s){
+            let signo = '';
+            s = String(s);
+            if (s[0] === '-') { signo = '−'; s = s.slice(1); }
+            let [ent, dec] = s.split('.');
+            if (ent.length > 3) ent = ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return signo + ent + (dec ? ',' + dec : '');
+        }
+        // Desplaza la coma n lugares por manipulación de cadena (sin coma flotante):
+        // derecha = ×10ⁿ, izquierda = ÷10ⁿ. La entrada usa '.' como separador decimal.
+        function desplazarComaStr(numStr, n, haciaDerecha){
+            let signo = '';
+            numStr = String(numStr).trim().replace(',', '.');
+            if (numStr[0] === '-') { signo = '-'; numStr = numStr.slice(1); }
+            let [ent, dec = ''] = numStr.split('.');
+            ent = ent.replace(/^0+(?=\d)/, '') || '0';
+            if (haciaDerecha){
+                if (dec.length <= n){ ent = ent + dec + '0'.repeat(n - dec.length); dec = ''; }
+                else { ent = ent + dec.slice(0, n); dec = dec.slice(n); }
+            } else {
+                if (ent.length <= n){ dec = '0'.repeat(n - ent.length) + ent + dec; ent = '0'; }
+                else { dec = ent.slice(ent.length - n) + dec; ent = ent.slice(0, ent.length - n); }
+            }
+            ent = ent.replace(/^0+(?=\d)/, '') || '0';
+            dec = dec.replace(/0+$/, '');
+            const res = ent + (dec ? '.' + dec : '');
+            return (res === '0' ? '' : signo) + res;
         }
         // Formato español: coma decimal y punto de millares (a partir de 4 cifras)
         function formatES(x){
@@ -1307,14 +1341,16 @@
                     html = resolverMultiplicacionDecimales(factor1, factor2);
 
                 } else if (tipo === 'mult-potencia10') {
-                    const numero = validarDecimal(document.getElementById('num-mult-pot').value, 'Número decimal');
+                    const raw = document.getElementById('num-mult-pot').value;
+                    validarDecimal(raw, 'Número decimal'); // valida el formato
                     const potencia = parseInt(document.getElementById('potencia-mult').value);
-                    html = resolverMultiplicacionPotencia10(numero, potencia);
+                    html = resolverMultiplicacionPotencia10(raw, potencia);
 
                 } else if (tipo === 'div-potencia10') {
-                    const numero = validarDecimal(document.getElementById('num-div-pot').value, 'Número decimal');
+                    const raw = document.getElementById('num-div-pot').value;
+                    validarDecimal(raw, 'Número decimal'); // valida el formato
                     const potencia = parseInt(document.getElementById('potencia-div').value);
-                    html = resolverDivisionPotencia10(numero, potencia);
+                    html = resolverDivisionPotencia10(raw, potencia);
 
                 } else if (tipo === 'div-decimal-natural') {
                     const dividendo = validarDecimal(document.getElementById('dividendo-dec').value, 'Dividendo');
