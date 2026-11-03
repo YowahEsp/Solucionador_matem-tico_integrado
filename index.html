@@ -667,17 +667,21 @@
             }
 
             let final_remainder_val = -1;
-            
+
             while(true) {
                 let current_dividend_val = parseInt(current_dividend_str);
-                
+
                 let quotient_digit = Math.floor(current_dividend_val / d_val);
                 let current_remainder_val = current_dividend_val % d_val;
-                
+
                 dividend_idx++;
-                
+
                 if (dividend_idx >= D_str.length) {
-                    final_remainder_val = current_remainder_val;
+                    // Si la última cifra del cociente es 0, la última línea bajada
+                    // (p. ej. "0 1") ya es el resto definitivo: no se repite.
+                    if (!(quotient_digit === 0 && intermediate_lines.length > 0)) {
+                        final_remainder_val = current_remainder_val;
+                    }
                     break;
                 }
                 
@@ -952,6 +956,12 @@
                     restoActualStr = resto.toString();
                     
                     let esUltimoPaso = (i === dividendoCalculoStr.length - 1);
+                    // Si la última cifra del cociente es 0, la línea anterior ya es el
+                    // resto definitivo: no se vuelve a escribir.
+                    if (esUltimoPaso && digitoCociente === 0 && todosLosPasos.length > 0) {
+                        todosLosPasos[todosLosPasos.length - 1].restoEnLinea = true;
+                        continue;
+                    }
                     let linea = esUltimoPaso ? resto.toString() : resto.toString() + dividendoCalculoStr[i + 1];
                     todosLosPasos.push({ linea: linea, pos_calc: esUltimoPaso ? i : i + 1 });
                 }
@@ -983,7 +993,7 @@
                 let lineChars = new Array(targetPos + 1).fill(' ');
 
                 let linea_a_mostrar = paso.linea;
-                const esElRestoFinal = index === todosLosPasos.length - 1;
+                const esElRestoFinal = index === todosLosPasos.length - 1 && !paso.restoEnLinea;
 
                 if (esElRestoFinal) {
                     const target_len_final = divisorCalculoStr.length;
